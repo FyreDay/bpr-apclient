@@ -3,8 +3,6 @@
 #include "net_bridge.hpp"
 #include <string>
 
-#include "../core/broadcast.hpp"
-
 //#define CERT_STORE "cacert.pem"
 //#define UUID_FILE "uuid" // TODO: place in %appdata%
 
@@ -14,13 +12,13 @@
 
 static constexpr const char* GAME_NAME = BPRAP_GAME_NAME;
 
-class APClient; 
+class APClient;
 
-class ArchepelagoNet
+class ArchipelagoNet
 {
 public:
-	ArchepelagoNet(NetworkBridge& bridge);
-	 ~ArchepelagoNet();
+	ArchipelagoNet(NetworkBridge& bridge);
+	 ~ArchipelagoNet();
 	 
 	void Run();
 	void Stop();
@@ -46,7 +44,7 @@ private:
 	std::atomic<bool> connected{false};
 	std::atomic<bool> deathlink_allowed_{false};
 	std::string seed;
-	int session_slot{-1};   
+	int session_slot{-1};
 	std::string slotname;
-	int last_item_index_{-1}; 	
+	int last_item_index_{-1};
 };

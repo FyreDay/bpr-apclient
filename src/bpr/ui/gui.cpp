@@ -1,15 +1,12 @@
 #include "gui.hpp"
 #include <imgui.h>
-#include <iostream>
 #include <d3d11.h>
 #include "bpr/app/app.hpp"
-#include "bpr/hooks/game_hooks.hpp"
 #include "broadcast_banner.hpp"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
 #include "info_window.hpp"
 #include "login_window.hpp"
-#include "bpr/hooks/function/detours.hpp"
 
 GUI::GUI(bpr::BannerQueue &banner_queue):banner_( banner_queue)
 {
@@ -32,7 +29,10 @@ GUI::GUI(bpr::BannerQueue &banner_queue):banner_( banner_queue)
     info_window = info.get();
     windows.push_back(std::move(login));
     windows.push_back(std::move(info));
-} 
+
+    imguiInputMode = false;
+    UpdateInputMode();
+}
 
 GUI::~GUI()
 {
@@ -46,27 +46,24 @@ GUI::~GUI()
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 bool GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    if (msg == WM_KEYDOWN && wParam == VK_F1)
-    {
-        SetInputMode(!imguiInputMode);
-        return false;
-    }
 
     if (msg == WM_KEYDOWN && wParam == VK_F2)
     {
         App::Instance->Gui().login_window->ToggleVisibility();
+        App::Instance->Gui().UpdateInputMode();
         return false;
     }
 
     if (msg == WM_KEYDOWN && wParam == VK_F3)
     {
         App::Instance->Gui().info_window->ToggleVisibility();
+        App::Instance->Gui().UpdateInputMode();
         return false;
     }
 
     if (!imguiInputMode)
         return true;
-    
+
     ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
     const ImGuiIO& io = ImGui::GetIO();
     if (io.WantCaptureMouse)
@@ -98,6 +95,7 @@ bool GUI::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 }
 
 void GUI::Render(){
+    UpdateInputMode();
     RECT rect;
     if (!GetClientRect(GUI::windowHandle, &rect)) {
         return;
@@ -120,6 +118,16 @@ void GUI::Render(){
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+}
+
+void GUI::UpdateInputMode()
+{
+    bool anyVisible = false;
+    for (const auto& window : windows)
+        if (window->isVisible) { anyVisible = true; break; }
+
+    if (anyVisible != imguiInputMode)
+        SetInputMode(anyVisible);
 }
 
 void GUI::SetInputMode(bool enabled)

@@ -3,16 +3,17 @@
 #include "bpr/net/ap_net.hpp"
 #include "bpr/core/ap/ap_state.hpp"
 #include "bpr/ui/gui.hpp"
-#include <Windows.h>
+#include <windows.h>
+#include <thread>
 
 class App
 {
     public:
         App();
         ~App();
-        
+
         static App* Instance;
-   
+
         GUI& Gui()
         {
             return gui_;
@@ -23,18 +24,18 @@ class App
             return state_;
         }
 
-        ArchepelagoNet& Network()
+        ArchipelagoNet& Network()
         {
             return network_;
         }
-        
+
         static bool WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
         static void Render();
         static void GameThread(void* gameActionQueue);
     private:
         NetworkBridge bridge_;
         ApState state_;
-        ArchepelagoNet network_;
+        ArchipelagoNet network_;
         GUI gui_;
         std::thread network_thread_;
 };
